@@ -259,12 +259,33 @@
   border-bottom-left-radius: 1rem;
   border-bottom-right-radius: 1rem;
 }
-.cbc-input-area form {
+
+/* Form Toggle Button */
+.cbc-form-toggle {
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.cbc-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--cbc-blue-600);
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px;
+  transition: color 0.2s;
+}
+.cbc-toggle-btn:hover {
+  color: var(--cbc-blue-700);
+}
+
+/* Text Form (Simple Input) */
+.cbc-text-form {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.cbc-input-area input {
+.cbc-text-form input {
   flex: 1;
   padding: 0.5rem 1rem;
   border: 1px solid var(--cbc-gray-300);
@@ -273,14 +294,14 @@
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.cbc-input-area input:focus {
+.cbc-text-form input:focus {
   border-color: var(--cbc-blue-600);
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 0 0 2px rgba(218, 46, 73, 0.2);
 }
-.cbc-input-area input:disabled {
+.cbc-text-form input:disabled {
   background-color: var(--cbc-gray-100);
 }
-.cbc-input-area button {
+.cbc-text-form button {
   background-color: var(--cbc-blue-600);
   color: var(--cbc-white);
   border: none;
@@ -292,17 +313,89 @@
   justify-content: center;
   cursor: pointer;
   transition: background-color 0.2s;
+  flex-shrink: 0;
 }
-.cbc-input-area button svg {
+.cbc-text-form button svg {
   width: 24px;
   height: 24px;
 }
-.cbc-input-area button:hover {
+.cbc-text-form button:hover:not(:disabled) {
   background-color: var(--cbc-blue-700);
 }
-.cbc-input-area button:disabled {
+.cbc-text-form button:disabled {
   background-color: var(--cbc-gray-400);
   cursor: not-allowed;
+}
+
+/* Structured Form */
+.cbc-structured-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cbc-form-row {
+  display: flex;
+  gap: 8px;
+}
+.cbc-form-row-split {
+  display: grid;
+  grid-template-columns: 1fr 100px;
+  gap: 8px;
+}
+.cbc-structured-form input,
+.cbc-structured-form select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--cbc-gray-300);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: var(--cbc-white);
+  font-family: inherit;
+}
+.cbc-structured-form input:focus,
+.cbc-structured-form select:focus {
+  border-color: var(--cbc-blue-600);
+  box-shadow: 0 0 0 2px rgba(218, 46, 73, 0.2);
+}
+.cbc-structured-form select {
+  cursor: pointer;
+  width: 100%;
+}
+.cbc-submit-btn {
+  background-color: var(--cbc-blue-600);
+  color: var(--cbc-white);
+  border: none;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+  margin-top: 4px;
+}
+.cbc-submit-btn svg {
+  width: 18px;
+  height: 18px;
+}
+.cbc-submit-btn:hover:not(:disabled) {
+  background-color: var(--cbc-blue-700);
+}
+.cbc-submit-btn:disabled {
+  background-color: var(--cbc-gray-400);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Responsive adjustments for forms */
+@media (max-width: 400px) {
+  .cbc-form-row-split {
+    grid-template-columns: 1fr 90px;
+  }
 }
 
 /* Battery Result Card */

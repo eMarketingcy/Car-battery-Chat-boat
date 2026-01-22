@@ -3,11 +3,12 @@ Contributors: eMarketing Cyprus by Saltpixel Ltd
 Tags: chatbot, woocommerce, ai, gemini, products, battery
 Requires at least: 5.0
 Tested up to: 6.5
-Stable tag: 1.9.2
+Stable tag: 2.1.0
+Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-An AI-powered chatbot to help customers find the right car battery in your WooCommerce store using Google's Gemini API. Now features Smart Cache and Manual Expert Training.
+An AI-powered chatbot to help customers find the right car battery in your WooCommerce store using Google's Gemini API. Features Smart Cache, Manual Expert Training, Structured Form Input, and Enhanced Sub-Model Detection.
 
 == Description ==
 
@@ -60,3 +61,29 @@ You can get an API key from Google AI Studio: https://aistudio.google.com/app/ap
 =
 
 Yes, this plugin is designed specifically to work with WooCommerce and will not function without it.
+
+= What's new in version 2.1.0?
+=
+
+Version 2.1.0 includes major improvements:
+* **Structured Form Input** - Users can now select car brand from dropdown and enter model, engine, and year in separate fields for more accurate results
+* **Enhanced AI Intelligence** - Improved sub-model detection to identify when multiple variants exist (e.g., Toyota Corolla 1.6 vs 1.6 VVT-i)
+* **Modernized Codebase** - Updated to PHP 8.0+ with type hints, better security, and improved performance
+* **Better Admin Interface** - Enhanced manual mappings and statistics pages
+* **Form Toggle** - Users can switch between structured form and free-text input
+
+== Changelog ==
+
+= 2.1.0 - 2026-01-22 =
+* **New Feature:** Added structured form input with dropdown for car brand and separate fields for model, engine, and year
+* **Enhancement:** Improved AI prompt to better detect sub-models and variants with different battery requirements
+* **Enhancement:** Modernized PHP code with type hints, constants, and PSR standards
+* **Enhancement:** Enhanced admin interface for manual mappings with better UX
+* **Enhancement:** Improved statistics page with better visual indicators
+* **Enhancement:** Added form toggle to switch between structured and free-text input
+* **Security:** Improved input validation and sanitization
+* **Performance:** Better error handling and code organization
+* **Requirement:** Minimum PHP version increased to 8.0
+
+= 2.0.5 =
+* Previous stable version with basic features

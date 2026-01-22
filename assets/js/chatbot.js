@@ -5,7 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
         isChatOpen: false,
         isLoading: false,
         messages: [],
-        currentQuery: '' // Stores the initial query to append clarifications (e.g. "Diesel") later
+        currentQuery: '', // Stores the initial query to append clarifications (e.g. "Diesel") later
+        useStructuredForm: true, // Use structured form by default
+        carBrands: [] // Popular car brands loaded from server
     };
 
     /**
@@ -67,30 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const messagesArea = document.createElement('div');
         messagesArea.className = 'cbc-messages';
         
-        // 3. Input Area
+        // 3. Input Area with Structured Form
         const inputArea = document.createElement('div');
         inputArea.className = 'cbc-input-area';
-        inputArea.innerHTML = `
-            <form>
-                <input type="text" placeholder="e.g., VW Golf 2018 1.6 TDI" required />
-                <button type="submit" aria-label="Send message" disabled>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                    </svg>
-                </button>
-            </form>
-        `;
+        inputArea.innerHTML = createInputAreaHTML();
 
-        // Bind Events
-        const form = inputArea.querySelector('form');
-        const input = inputArea.querySelector('input');
-        const submitButton = inputArea.querySelector('button');
-
-        input.addEventListener('input', () => {
-            submitButton.disabled = input.value.trim() === '' || STATE.isLoading;
-        });
-
-        form.addEventListener('submit', handleSendMessage);
+        // Bind Events after creating the input area
+        bindInputAreaEvents(inputArea);
 
         // Assemble Window
         chatbotContainer.append(header, messagesArea, inputArea);
@@ -207,6 +192,171 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     /**
+     * Create the input area HTML based on form mode
+     */
+    function createInputAreaHTML() {
+        if (STATE.useStructuredForm) {
+            return `
+                <div class="cbc-form-toggle">
+                    <button type="button" class="cbc-toggle-btn" onclick="cbcToggleFormMode()">
+                        Switch to Text Input
+                    </button>
+                </div>
+                <form class="cbc-structured-form">
+                    <div class="cbc-form-row">
+                        <select id="cbc-brand" required>
+                            <option value="">Select Brand</option>
+                        </select>
+                    </div>
+                    <div class="cbc-form-row">
+                        <input type="text" id="cbc-model" placeholder="Model (e.g., Golf)" required />
+                    </div>
+                    <div class="cbc-form-row cbc-form-row-split">
+                        <input type="text" id="cbc-engine" placeholder="Engine (e.g., 1.6 TDI)" required />
+                        <input type="number" id="cbc-year" placeholder="Year" min="1980" max="${new Date().getFullYear() + 1}" required />
+                    </div>
+                    <button type="submit" class="cbc-submit-btn" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                        </svg>
+                        <span>Find Battery</span>
+                    </button>
+                </form>
+            `;
+        } else {
+            return `
+                <div class="cbc-form-toggle">
+                    <button type="button" class="cbc-toggle-btn" onclick="cbcToggleFormMode()">
+                        Switch to Form
+                    </button>
+                </div>
+                <form class="cbc-text-form">
+                    <input type="text" placeholder="e.g., VW Golf 2018 1.6 TDI" required />
+                    <button type="submit" aria-label="Send message" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                        </svg>
+                    </button>
+                </form>
+            `;
+        }
+    }
+
+    /**
+     * Bind events to input area elements
+     */
+    function bindInputAreaEvents(inputArea) {
+        const form = inputArea.querySelector('form');
+
+        if (STATE.useStructuredForm) {
+            const brandSelect = inputArea.querySelector('#cbc-brand');
+            const modelInput = inputArea.querySelector('#cbc-model');
+            const engineInput = inputArea.querySelector('#cbc-engine');
+            const yearInput = inputArea.querySelector('#cbc-year');
+            const submitButton = inputArea.querySelector('.cbc-submit-btn');
+
+            // Load car brands
+            loadCarBrands(brandSelect);
+
+            // Validate form on input
+            const validateForm = () => {
+                const isValid = brandSelect.value && modelInput.value.trim() &&
+                               engineInput.value.trim() && yearInput.value.trim();
+                submitButton.disabled = !isValid || STATE.isLoading;
+            };
+
+            brandSelect.addEventListener('change', validateForm);
+            modelInput.addEventListener('input', validateForm);
+            engineInput.addEventListener('input', validateForm);
+            yearInput.addEventListener('input', validateForm);
+
+            form.addEventListener('submit', handleStructuredFormSubmit);
+        } else {
+            const input = inputArea.querySelector('input');
+            const submitButton = inputArea.querySelector('button[type="submit"]');
+
+            input.addEventListener('input', () => {
+                submitButton.disabled = input.value.trim() === '' || STATE.isLoading;
+            });
+
+            form.addEventListener('submit', handleSendMessage);
+        }
+    }
+
+    /**
+     * Load car brands into dropdown
+     */
+    async function loadCarBrands(selectElement) {
+        if (STATE.carBrands.length > 0) {
+            populateBrandDropdown(selectElement, STATE.carBrands);
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('action', 'cbc_get_car_brands');
+            formData.append('nonce', cbc_ajax.nonce);
+
+            const response = await fetch(cbc_ajax.ajax_url, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.success && result.data.brands) {
+                STATE.carBrands = result.data.brands;
+                populateBrandDropdown(selectElement, STATE.carBrands);
+            }
+        } catch (error) {
+            console.error('Failed to load car brands:', error);
+        }
+    }
+
+    /**
+     * Populate brand dropdown with options
+     */
+    function populateBrandDropdown(selectElement, brands) {
+        brands.forEach(brand => {
+            const option = document.createElement('option');
+            option.value = brand;
+            option.textContent = brand;
+            selectElement.appendChild(option);
+        });
+    }
+
+    /**
+     * Global function to toggle between form modes
+     */
+    window.cbcToggleFormMode = function() {
+        STATE.useStructuredForm = !STATE.useStructuredForm;
+        const inputArea = document.querySelector('.cbc-input-area');
+        if (inputArea) {
+            inputArea.innerHTML = createInputAreaHTML();
+            bindInputAreaEvents(inputArea);
+        }
+    };
+
+    /**
+     * Handle structured form submission
+     */
+    async function handleStructuredFormSubmit(e) {
+        e.preventDefault();
+
+        const brand = document.getElementById('cbc-brand').value;
+        const model = document.getElementById('cbc-model').value.trim();
+        const engine = document.getElementById('cbc-engine').value.trim();
+        const year = document.getElementById('cbc-year').value.trim();
+
+        if (!brand || !model || !engine || !year || STATE.isLoading) return;
+
+        // Construct query from form fields
+        const userMessage = `${brand} ${model} ${year} ${engine}`;
+
+        // Process the message
+        await processUserMessage(userMessage);
+    }
+
+    /**
      * Global Handler for Clarification Buttons (Petrol/Diesel/Hybrid)
      * Attached to window so inline HTML onclicks work.
      */
@@ -229,13 +379,23 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     /**
-     * Handle Form Submission (Sending Message to Server)
+     * Handle text form submission
      */
     async function handleSendMessage(e) {
         e.preventDefault();
-        const input = document.querySelector('.cbc-input-area input');
+        const input = document.querySelector('.cbc-text-form input');
         const userMessage = input.value.trim();
-        
+
+        if (!userMessage || STATE.isLoading) return;
+
+        input.value = '';
+        await processUserMessage(userMessage);
+    }
+
+    /**
+     * Process user message and send to server
+     */
+    async function processUserMessage(userMessage) {
         if (!userMessage || STATE.isLoading) return;
 
         // Store query for context (clarifications)
@@ -243,7 +403,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Display User Message
         addMessage({ sender: 'user', content: userMessage });
-        input.value = '';
         setLoading(true);
 
         try {
