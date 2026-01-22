@@ -3,7 +3,7 @@
  * Plugin Name:       Car Battery AI Chatbot
  * Plugin URI:        https://emarketing.cy
  * Description:       An AI-powered chatbot to help customers find the right car battery. Features Smart Cache, Expert Training, Auto-JIS Calculation, Smart Clarification, and Structured Form Input for better accuracy.
- * Version:           2.1.0
+ * Version:           2.2.0
  * Author:            eMarketing Cyprus
  * Author URI:        https://emarketing.cy
  * License:           GPLv2 or later
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'CBC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'CBC_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CBC_PLUGIN_FILE', __FILE__ );
-define( 'CBC_VERSION', '2.1.0' );
+define( 'CBC_VERSION', '2.2.0' );
 define( 'CBC_DB_VERSION', '1.2' );
 
 // Include Sub-Classes
@@ -178,13 +178,13 @@ class CarBatteryChatbot {
                 <strong>IMPORTANT:</strong> Please clear your browser cache and perform a hard refresh (Ctrl+F5 or Cmd+Shift+R) to see the new features:
             </p>
             <ul style="list-style: disc; margin-left: 20px;">
-                <li><strong>Structured Form Input</strong> - New dropdown for car brand selection with 30+ pre-loaded brands</li>
-                <li><strong>Separate fields</strong> for Model, Engine, and Year</li>
-                <li><strong>Enhanced AI</strong> with better sub-model detection</li>
-                <li><strong>Toggle button</strong> to switch between form and free-text input</li>
+                <li><strong>Live Search Autocomplete</strong> - Type to search brands in real-time, or enter any custom brand</li>
+                <li><strong>Safari/Arc Browser Compatibility</strong> - Fixed AJAX issues for better cross-browser support</li>
+                <li><strong>Custom Brand Entry</strong> - No longer limited to predefined brands</li>
+                <li><strong>Enhanced Cache Busting</strong> - Updates now load immediately without manual cache clearing</li>
             </ul>
             <p style="color: #d63638;">
-                <strong>If you still see the old interface, clear your browser cache!</strong>
+                <strong>If you still see the old dropdown, clear your browser cache, Cloudflare cache, and LiteSpeed cache!</strong>
             </p>
         </div>
         <?php
@@ -751,27 +751,31 @@ class CarBatteryChatbot {
     }
 
     /**
-     * Enqueue frontend scripts and styles
+     * Enqueue frontend scripts and styles with aggressive cache busting
      *
      * @return void
      */
     public function enqueue_scripts(): void {
-        // Use file modification time for cache busting
-        $css_version = filemtime( CBC_PLUGIN_PATH . 'assets/css/chatbot.css' );
-        $js_version = filemtime( CBC_PLUGIN_PATH . 'assets/js/chatbot.js' );
+        // Use file modification time for cache busting - this ensures browsers
+        // load the latest version when files are updated
+        $css_path = CBC_PLUGIN_PATH . 'assets/css/chatbot.css';
+        $js_path = CBC_PLUGIN_PATH . 'assets/js/chatbot.js';
+
+        $css_version = file_exists( $css_path ) ? filemtime( $css_path ) : CBC_VERSION;
+        $js_version = file_exists( $js_path ) ? filemtime( $js_path ) : CBC_VERSION;
 
         wp_enqueue_style(
             'cbc-css',
             CBC_PLUGIN_URL . 'assets/css/chatbot.css',
             [],
-            $css_version ?: CBC_VERSION
+            $css_version
         );
 
         wp_enqueue_script(
             'cbc-js',
             CBC_PLUGIN_URL . 'assets/js/chatbot.js',
             [],
-            $js_version ?: CBC_VERSION,
+            $js_version,
             true
         );
 
