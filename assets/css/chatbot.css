@@ -391,10 +391,71 @@
   opacity: 0.6;
 }
 
+/* Brand Autocomplete Container */
+.cbc-brand-autocomplete-container {
+  position: relative;
+}
+
+/* Brand Suggestions Dropdown */
+.cbc-brand-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--cbc-white);
+  border: 1px solid var(--cbc-gray-300);
+  border-top: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: -8px;
+}
+
+/* Brand Suggestion Item */
+.cbc-brand-suggestion-item {
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--cbc-gray-800);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  border-bottom: 1px solid var(--cbc-gray-200);
+}
+
+.cbc-brand-suggestion-item:last-child {
+  border-bottom: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+.cbc-brand-suggestion-item:hover {
+  background-color: var(--cbc-gray-100);
+}
+
+.cbc-brand-suggestion-item.cbc-no-results {
+  cursor: default;
+  color: var(--cbc-gray-400);
+  font-style: italic;
+}
+
+.cbc-brand-suggestion-item.cbc-no-results:hover {
+  background-color: transparent;
+}
+
+/* Adjust input border radius when suggestions are visible */
+.cbc-brand-autocomplete-container:has(.cbc-brand-suggestions[style*="display: block"]) #cbc-brand {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
 /* Responsive adjustments for forms */
 @media (max-width: 400px) {
   .cbc-form-row-split {
     grid-template-columns: 1fr 90px;
+  }
+
+  .cbc-brand-suggestions {
+    max-height: 150px;
   }
 }
 

@@ -203,10 +203,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     </button>
                 </div>
                 <form class="cbc-structured-form">
-                    <div class="cbc-form-row">
-                        <select id="cbc-brand" required>
-                            <option value="">Select Brand</option>
-                        </select>
+                    <div class="cbc-form-row cbc-brand-autocomplete-container">
+                        <input type="text" id="cbc-brand" placeholder="Start typing brand name..." autocomplete="off" required />
+                        <div class="cbc-brand-suggestions" style="display: none;"></div>
                     </div>
                     <div class="cbc-form-row">
                         <input type="text" id="cbc-model" placeholder="Model (e.g., Golf)" required />
@@ -249,23 +248,61 @@ document.addEventListener('DOMContentLoaded', () => {
         const form = inputArea.querySelector('form');
 
         if (STATE.useStructuredForm) {
-            const brandSelect = inputArea.querySelector('#cbc-brand');
+            const brandInput = inputArea.querySelector('#cbc-brand');
             const modelInput = inputArea.querySelector('#cbc-model');
             const engineInput = inputArea.querySelector('#cbc-engine');
             const yearInput = inputArea.querySelector('#cbc-year');
             const submitButton = inputArea.querySelector('.cbc-submit-btn');
+            const suggestionsContainer = inputArea.querySelector('.cbc-brand-suggestions');
 
             // Load car brands
-            loadCarBrands(brandSelect);
+            loadCarBrands();
 
             // Validate form on input
             const validateForm = () => {
-                const isValid = brandSelect.value && modelInput.value.trim() &&
+                const isValid = brandInput.value.trim() && modelInput.value.trim() &&
                                engineInput.value.trim() && yearInput.value.trim();
                 submitButton.disabled = !isValid || STATE.isLoading;
             };
 
-            brandSelect.addEventListener('change', validateForm);
+            // Brand autocomplete functionality
+            brandInput.addEventListener('input', (e) => {
+                const query = e.target.value.trim().toLowerCase();
+
+                if (query.length === 0) {
+                    hideBrandSuggestions(suggestionsContainer);
+                    validateForm();
+                    return;
+                }
+
+                // Filter brands based on query
+                const filteredBrands = STATE.carBrands.filter(brand =>
+                    brand.toLowerCase().includes(query)
+                );
+
+                showBrandSuggestions(suggestionsContainer, filteredBrands, brandInput);
+                validateForm();
+            });
+
+            brandInput.addEventListener('focus', () => {
+                if (brandInput.value.trim() && STATE.carBrands.length > 0) {
+                    const query = brandInput.value.trim().toLowerCase();
+                    const filteredBrands = STATE.carBrands.filter(brand =>
+                        brand.toLowerCase().includes(query)
+                    );
+                    if (filteredBrands.length > 0) {
+                        showBrandSuggestions(suggestionsContainer, filteredBrands, brandInput);
+                    }
+                }
+            });
+
+            // Close suggestions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!brandInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                    hideBrandSuggestions(suggestionsContainer);
+                }
+            });
+
             modelInput.addEventListener('input', validateForm);
             engineInput.addEventListener('input', validateForm);
             yearInput.addEventListener('input', validateForm);
@@ -284,11 +321,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Load car brands into dropdown
+     * Load car brands from server
      */
-    async function loadCarBrands(selectElement) {
+    async function loadCarBrands() {
         if (STATE.carBrands.length > 0) {
-            populateBrandDropdown(selectElement, STATE.carBrands);
             return;
         }
 
@@ -299,29 +335,80 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const response = await fetch(cbc_ajax.ajax_url, {
                 method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                },
                 body: formData
             });
 
-            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const text = await response.text();
+            let result;
+
+            try {
+                result = JSON.parse(text);
+            } catch (err) {
+                console.error('Failed to parse JSON response:', text);
+                throw new Error('Invalid server response');
+            }
+
             if (result.success && result.data.brands) {
                 STATE.carBrands = result.data.brands;
-                populateBrandDropdown(selectElement, STATE.carBrands);
+            } else {
+                console.error('Failed to load brands:', result);
             }
         } catch (error) {
             console.error('Failed to load car brands:', error);
+            // Fallback to hardcoded brands if AJAX fails
+            STATE.carBrands = [
+                'Toyota', 'Honda', 'Nissan', 'Mazda', 'Subaru', 'Mitsubishi', 'Suzuki',
+                'Mercedes-Benz', 'BMW', 'Audi', 'Volkswagen', 'Porsche', 'Opel',
+                'Ford', 'Chevrolet', 'Chrysler', 'Dodge', 'Jeep',
+                'Peugeot', 'Renault', 'Citroën', 'Fiat', 'Alfa Romeo',
+                'Hyundai', 'Kia',
+                'Volvo', 'SEAT', 'Skoda', 'Land Rover', 'Jaguar'
+            ];
         }
     }
 
     /**
-     * Populate brand dropdown with options
+     * Show brand suggestions dropdown
      */
-    function populateBrandDropdown(selectElement, brands) {
+    function showBrandSuggestions(container, brands, inputElement) {
+        if (brands.length === 0) {
+            container.innerHTML = '<div class="cbc-brand-suggestion-item cbc-no-results">No brands found. You can type any brand name.</div>';
+            container.style.display = 'block';
+            return;
+        }
+
+        container.innerHTML = '';
         brands.forEach(brand => {
-            const option = document.createElement('option');
-            option.value = brand;
-            option.textContent = brand;
-            selectElement.appendChild(option);
+            const item = document.createElement('div');
+            item.className = 'cbc-brand-suggestion-item';
+            item.textContent = brand;
+            item.addEventListener('click', () => {
+                inputElement.value = brand;
+                hideBrandSuggestions(container);
+
+                // Trigger validation
+                const event = new Event('input', { bubbles: true });
+                inputElement.dispatchEvent(event);
+            });
+            container.appendChild(item);
         });
+        container.style.display = 'block';
+    }
+
+    /**
+     * Hide brand suggestions dropdown
+     */
+    function hideBrandSuggestions(container) {
+        container.style.display = 'none';
+        container.innerHTML = '';
     }
 
     /**
