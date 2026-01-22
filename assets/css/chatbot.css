@@ -1,0 +1,403 @@
+:root {
+    --cbc-blue-600: #da2e49;
+    --cbc-blue-700: #d24f65;
+    --cbc-gray-100: #f3f4f6;
+    --cbc-gray-200: #e5e7eb;
+    --cbc-gray-300: #d1d5db;
+    --cbc-gray-400: #9ca3af;
+    --cbc-gray-800: #1f2937;
+    --cbc-gray-900: #111827;
+    --cbc-green-500: #282828;
+    --cbc-green-600: #282828;
+    --cbc-white: #ffffff;
+}
+
+/* Chat Tab */
+.cbc-bubble {
+  position: fixed;
+  bottom: 0;
+  left: 40px;
+  z-index: 1000;
+  background-color: var(--cbc-blue-600);
+  color: var(--cbc-white);
+  
+  /* New tab shape */
+  padding: 10px 18px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  
+  /* Content layout */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  /* Font and Shadow */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 -4px 15px -3px rgba(0, 0, 0, 0.1);
+
+  /* Other */
+  border: none;
+  cursor: pointer;
+  transform: translateY(0);
+  transition: transform 0.2s ease-in-out, background-color 0.2s;
+}
+
+.cbc-bubble:hover {
+  background-color: var(--cbc-blue-700);
+  transform: translateY(-4px); /* Lifts up slightly on hover */
+}
+
+.cbc-bubble svg {
+  width: 24px;
+  height: 24px;
+}
+
+.cbc-bubble span {
+  display: block;
+}
+
+/* Make it responsive on small screens */
+@media (max-width: 480px) {
+  .cbc-bubble {
+    left: 20px;
+    padding: 8px 12px;
+  }
+  .cbc-bubble span {
+    font-size: 0.875rem;
+  }
+  .cbc-bubble svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Chatbot Container */
+.cbc-chatbot {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 999999;
+  width: 360px;
+  height: 70vh;
+  max-height: 520px;
+  background-color: var(--cbc-gray-200);
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease-in-out;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+@media (max-width: 400px) {
+  .cbc-chatbot {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    bottom: 0;
+    left: 0;
+    border-radius: 0;
+  }
+}
+
+/* Header */
+.cbc-header {
+  background-color: var(--cbc-blue-600);
+  color: var(--cbc-white);
+  padding: 0.75rem 1rem;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.cbc-header h3 {
+    font-weight: 700;
+    font-size: 1.125rem !important;
+    margin: 0;
+    color: #fff !important;
+}
+.cbc-header button {
+  background: transparent;
+  border: none;
+  color: var(--cbc-white);
+  padding: 4px;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+.cbc-header button:hover {
+  background-color: var(--cbc-blue-700);
+}
+.cbc-header svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Messages Area */
+.cbc-messages {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Message Bubble */
+.cbc-message-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 90%;
+}
+.cbc-message-wrapper.user {
+  justify-content: flex-end;
+  margin-left: auto;
+}
+.cbc-message-wrapper.bot {
+  justify-content: flex-start;
+  margin-right: auto;
+}
+.cbc-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.cbc-avatar img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+.cbc-message {
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.cbc-message p {
+  margin: 0;
+}
+.cbc-message-wrapper.user .cbc-message {
+  background-color: var(--cbc-blue-600);
+  color: var(--cbc-white);
+  border-bottom-right-radius: 0;
+}
+.cbc-message-wrapper.bot .cbc-message {
+  background-color: var(--cbc-white);
+  color: var(--cbc-gray-800);
+  border-bottom-left-radius: 0;
+}
+
+/* --- NEW: CLARIFICATION OPTION BUTTONS --- */
+.cbc-options-container {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+.cbc-option-btn {
+    background-color: var(--cbc-gray-100);
+    border: 1px solid var(--cbc-blue-600);
+    color: var(--cbc-blue-600);
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.cbc-option-btn:hover {
+    background-color: var(--cbc-blue-600);
+    color: white;
+}
+.cbc-option-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+    background-color: var(--cbc-gray-200);
+    border-color: var(--cbc-gray-300);
+    color: var(--cbc-gray-500);
+}
+
+/* Loading Indicator */
+.cbc-loading-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cbc-loading-dots span {
+  width: 8px;
+  height: 8px;
+  background-color: var(--cbc-gray-400);
+  border-radius: 9999px;
+  animation: cbc-bounce 1s infinite;
+}
+.cbc-loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.cbc-loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes cbc-bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1.0); }
+}
+
+
+/* Input Area */
+.cbc-input-area {
+  padding: 0.75rem;
+  background-color: var(--cbc-white);
+  border-top: 1px solid var(--cbc-gray-300);
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+}
+.cbc-input-area form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cbc-input-area input {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--cbc-gray-300);
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.cbc-input-area input:focus {
+  border-color: var(--cbc-blue-600);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4);
+}
+.cbc-input-area input:disabled {
+  background-color: var(--cbc-gray-100);
+}
+.cbc-input-area button {
+  background-color: var(--cbc-blue-600);
+  color: var(--cbc-white);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.cbc-input-area button svg {
+  width: 24px;
+  height: 24px;
+}
+.cbc-input-area button:hover {
+  background-color: var(--cbc-blue-700);
+}
+.cbc-input-area button:disabled {
+  background-color: var(--cbc-gray-400);
+  cursor: not-allowed;
+}
+
+/* Battery Result Card */
+.cbc-battery-result {
+  background-color: #f9fafb; /* gray-50 */
+  border: 1px solid var(--cbc-gray-200);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  display: flex;
+  gap: 0.75rem;
+  color: var(--cbc-gray-800);
+  font-size: 0.75rem; /* text-xs */
+  line-height: 1.25;
+      flex-wrap: wrap;
+
+}
+.cbc-battery-result:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+.cbc-battery-result img {
+  width: 64px;
+  height: 64px !important;
+  object-fit: cover;
+  border-radius: 0.375rem;
+  flex-shrink: 0;
+}
+.cbc-battery-result h4 {
+    font-weight: 700;
+    font-size: 0.875rem !important;
+    color: #da2e49 !important;
+    margin: 0 0 4px 0;
+}
+.cbc-battery-result p {
+  margin: 0 0 2px 0;
+}
+.cbc-battery-result-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+.cbc-battery-price {
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 800;
+  color: var(--cbc-gray-900);
+}
+.cbc-battery-link {
+  background-color: var(--cbc-green-500);
+  color: var(--cbc-white) !important;
+  text-align: center;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+.cbc-battery-link:hover {
+  background-color: var(--cbc-green-600);
+}
+/* View More Link Button */
+.cbc-view-more-link {
+  display: block;
+  text-decoration: none;
+  background-color: var(--cbc-green-500);
+  color: var(--cbc-white);
+  padding: 8px 12px;
+  border-radius: 0.375rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-align: center;
+  margin-top: 12px;
+  transition: background-color 0.2s;
+}
+.cbc-view-more-link:hover {
+  background-color: var(--cbc-green-600);
+}
+
+/* Disclaimer Text */
+.cbc-disclaimer {
+  font-size: 0.75rem; /* 12px */
+  line-height: 1.4;
+  color: var(--cbc-gray-400);
+  font-style: italic;
+  border-top: 1px solid var(--cbc-gray-200);
+  padding-top: 8px;
+  margin-top: 12px;
+}
+.cbc-disclaimer a {
+  color: var(--cbc-blue-600);
+  text-decoration: none;
+  font-weight: 600;
+}
+.cbc-disclaimer a:hover {
+  color: var(--cbc-blue-700);
+  text-decoration: underline;
+}
