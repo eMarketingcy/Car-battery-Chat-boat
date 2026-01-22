@@ -21,6 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'CBC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'CBC_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
+define( 'CBC_PLUGIN_FILE', __FILE__ );
+define( 'CBC_VERSION', '2.1.0' );
 define( 'CBC_DB_VERSION', '1.2' );
 
 // Include Sub-Classes
@@ -53,6 +55,7 @@ class CarBatteryChatbot {
 
         // Core Hooks
         add_action( 'admin_notices', [ $this, 'check_dependencies' ] );
+        add_action( 'admin_notices', [ $this, 'show_update_notice' ] );
         add_action( 'admin_menu', [ $this, 'register_admin_menus' ] );
         add_action( 'admin_init', [ $this, 'register_settings' ] );
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
@@ -69,9 +72,46 @@ class CarBatteryChatbot {
     }
 
     public function update_db_check() {
+        // Check and update database version
         if ( get_site_option( 'cbc_db_version' ) != CBC_DB_VERSION ) {
             $this->install_db();
         }
+
+        // Check and update plugin version
+        $current_version = get_option( 'cbc_plugin_version', '0.0.0' );
+        if ( version_compare( $current_version, CBC_VERSION, '<' ) ) {
+            $this->run_version_upgrade( $current_version );
+        }
+    }
+
+    /**
+     * Run version upgrade routines
+     *
+     * @param string $from_version The version being upgraded from
+     * @return void
+     */
+    public function run_version_upgrade( string $from_version ): void {
+        // Clear any cached data if needed
+        // This runs when upgrading from any older version to current version
+
+        // Update the stored version
+        update_option( 'cbc_plugin_version', CBC_VERSION );
+
+        // Set a transient to show admin notice
+        set_transient( 'cbc_show_update_notice', true, 60 );
+    }
+
+    /**
+     * Plugin activation hook
+     *
+     * @return void
+     */
+    public static function activate(): void {
+        // Store the plugin version
+        update_option( 'cbc_plugin_version', CBC_VERSION );
+
+        // Flush rewrite rules
+        flush_rewrite_rules();
     }
 
     public function install_db() {
@@ -119,6 +159,38 @@ class CarBatteryChatbot {
                 esc_html( implode( ', ', $missing_dependencies ) )
             );
         }
+    }
+
+    /**
+     * Show update notice after plugin upgrade
+     *
+     * @return void
+     */
+    public function show_update_notice(): void {
+        if ( ! get_transient( 'cbc_show_update_notice' ) ) {
+            return;
+        }
+
+        ?>
+        <div class="notice notice-success is-dismissible">
+            <p>
+                <strong>Car Battery AI Chatbot updated to v<?php echo esc_html( CBC_VERSION ); ?>!</strong><br>
+                <strong>IMPORTANT:</strong> Please clear your browser cache and perform a hard refresh (Ctrl+F5 or Cmd+Shift+R) to see the new features:
+            </p>
+            <ul style="list-style: disc; margin-left: 20px;">
+                <li><strong>Structured Form Input</strong> - New dropdown for car brand selection with 30+ pre-loaded brands</li>
+                <li><strong>Separate fields</strong> for Model, Engine, and Year</li>
+                <li><strong>Enhanced AI</strong> with better sub-model detection</li>
+                <li><strong>Toggle button</strong> to switch between form and free-text input</li>
+            </ul>
+            <p style="color: #d63638;">
+                <strong>If you still see the old interface, clear your browser cache!</strong>
+            </p>
+        </div>
+        <?php
+
+        // Delete the transient so the notice only shows once
+        delete_transient( 'cbc_show_update_notice' );
     }
 
     public function register_admin_menus() {
@@ -684,18 +756,22 @@ class CarBatteryChatbot {
      * @return void
      */
     public function enqueue_scripts(): void {
+        // Use file modification time for cache busting
+        $css_version = filemtime( CBC_PLUGIN_PATH . 'assets/css/chatbot.css' );
+        $js_version = filemtime( CBC_PLUGIN_PATH . 'assets/js/chatbot.js' );
+
         wp_enqueue_style(
             'cbc-css',
             CBC_PLUGIN_URL . 'assets/css/chatbot.css',
             [],
-            '2.1.0'
+            $css_version ?: CBC_VERSION
         );
 
         wp_enqueue_script(
             'cbc-js',
             CBC_PLUGIN_URL . 'assets/js/chatbot.js',
             [],
-            '2.1.0',
+            $js_version ?: CBC_VERSION,
             true
         );
 
@@ -709,4 +785,9 @@ class CarBatteryChatbot {
         ] );
     }
 }
+
+// Initialize the plugin
 new CarBatteryChatbot();
+
+// Register activation hook
+register_activation_hook( CBC_PLUGIN_FILE, [ 'CarBatteryChatbot', 'activate' ] );
