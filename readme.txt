@@ -1,5 +1,5 @@
 === Car Battery AI Chatbot ===
-Contributors: AI
+Contributors: eMarketing Cyprus by Saltpixel Ltd
 Tags: chatbot, woocommerce, ai, gemini, products, battery
 Requires at least: 5.0
 Tested up to: 6.5
